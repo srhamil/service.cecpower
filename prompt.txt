@@ -1,0 +1,86 @@
+service.cecpower — resurrection prompt
+=======================================
+
+Paste this (plus the add-on source and README.md) into a new session to resume work.
+
+GOAL
+----
+Kodi service add-on for my LibreELEC boxes (Pi 4, LibreELEC 12.0.2, Kodi 21 Omega)
+that puts a box into low power while it is not the displayed HDMI source according
+to CEC, and restores it instantly when selected again. Work within the LibreELEC
+design philosophy: everything lives in /storage as a normal Kodi add-on, survives
+updates, configured through settings.xml, no systemd units or autostart.sh hacks,
+ConnMan owns networking, Kodi/libCEC owns CEC.
+
+MY SETUP
+--------
+- Denon AVR is the hub (hub-and-spoke); Sony Bravia TV; all sources go through the
+  Denon. Sources are configured via CEC NOT to turn on the TV.
+- CEC physical addresses: TV 0.0.0.0, Denon 3.0.0.0 (LA Audio, vendor 00:05:cd),
+  Audio-Kodi 3.2.0.0 (LA Tuner1), Sony DVD/Blu-ray 3.3.0.0 (LA Play1),
+  Video-Kodi 3.5.0.0 (LA Rec1). Kodi boxes show libCEC vendor 00:15:82.
+- Audio-Kodi is a hi-fi appliance with a DAC HAT; it may play radio/music while the
+  TV shows another input. Video-Kodi is the video box.
+- A separate small keep-alive service re-sends Set OSD Name every ~10 s because
+  the TV loses track of the Kodi names. Harmless; ignore it. (The Sony DVD player
+  sometimes answers it with Feature Abort 47:00 — also harmless.)
+- Kodi CEC settings may be set to ignore power messages (deliberate). Kodi's CEC
+  "Pause playback when switching to another source" handles pausing; the add-on
+  does not pause anything itself.
+- No Denon-internal sources (HEOS/tuner/Bluetooth) in use.
+- The TV always powers on to its own home screen (it does not remember inputs).
+
+FINDINGS FROM BUS TESTING (cec_probe.py)
+----------------------------------------
+- /dev/cec0 can be opened in kernel MONITOR mode next to Kodi's libCEC with no
+  interference. MONITOR_ALL is NOT supported by vc4_hdmi (EINVAL); plain monitor
+  (broadcasts + traffic to/from this box) turned out to be sufficient.
+- Input switch: TV broadcasts Set Stream Path <PA>; the selected Kodi answers with
+  Image View On + Active Source. DVD player announces itself with Active Source.
+- Power on: TV broadcasts Active Source 0.0.0.0 (its home screen). Kodi may
+  spontaneously claim Active Source a few seconds later; the TV takes it back.
+- Off via TV remote: TV broadcasts Standby (0x36).
+- Off via Denon remote: no Standby seen; Denon broadcasts Routing Change to
+  3.1.0.0 (an empty input) and Set System Audio Mode off.
+- The Denon bounces HPD on every switch: our PA goes to f.f.f.f briefly and the LA
+  mask to 0. Must ignore the bounce and keep the last valid PA.
+- Pi 4 board LEDs (ACT GPIO 42, PWR via firmware GPIO expander) are on/off only,
+  max_brightness 1, no dimming. Ethernet jack LEDs are config.txt-only.
+
+DESIGN DECISIONS
+----------------
+- Verdict: selected = Set Stream Path / Active Source naming our PA (from anyone,
+  including our own Kodi). Not selected = Set Stream Path / Active Source /
+  Routing Change naming any other PA, or Standby. Everything else ignored.
+- Sleep when: not actually playing (paused = not playing; use
+  getCondVisibility("Player.Playing"), NOT Player().isPlaying()), not selected for
+  >= delay (unknown since start counts as not selected), no input for >= delay,
+  and >= delay since the last wake / end of playback. Optional idle backstop
+  (default off): sleep while selected after N seconds of no input.
+- Wake on any "we were selected" message (every one, not only changes),
+  playback starting, or any input (Kodi idle time decreasing).
+- Actions, each optional and each restoring exactly what it saved: activate the
+  configured screensaver (dismiss on wake via JSON-RPC Input.ExecuteAction noop),
+  ACT/PWR LEDs trigger none + brightness 0, cap policy0/scaling_max_freq
+  (default 600 MHz = Pi 4 floor), Ethernet via connmanctl disable/enable
+  (default OFF). ConnMan persists the disable across reboot, so a marker file in
+  addon_data is written before disabling and the service re-enables Ethernet at
+  startup if the marker exists.
+- Wake order: ethernet, cpu, leds, screensaver (slowest first).
+- Code layout: service.py (Kodi glue), resources/lib/cecmon.py (passive CEC
+  thread), policy.py (pure sleep/wake logic, unit-testable without Kodi),
+  actions.py (low-power actions). Settings use the Kodi 21 settings format with
+  strings.po.
+
+STATUS
+------
+- 0.1.0: first build. 0.1.1: paused playback no longer blocks sleep.
+  0.2.0: sleep delay and idle backstop in seconds (new setting IDs sleep_delay_s /
+  idle_backstop_s so old minute values are not misread; delay min 10 s, default 180 s).
+- Logic was tested off-box by replaying the real CEC log and with stub
+  xbmc modules + fake sysfs. Installed on Audio-Kodi 2026-10-13 and working; in a
+  multi-day soak test. Next: install on Video-Kodi with Kodi's CEC "pause on
+  switch" enabled. Watch for slow/missed wakes, screensaver interaction with my
+  Bravia screensaver add-on, and Audio-Kodi sleeping during audio playback.
+- Troubleshooting: enable "Log CEC routing messages", then
+  tail -f /storage/.kodi/temp/kodi.log | grep cecpower

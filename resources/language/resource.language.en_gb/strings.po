@@ -1,0 +1,95 @@
+# Kodi Media Center language file
+# Addon id: service.cecpower
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en_GB\n"
+
+msgctxt "#30000"
+msgid "General"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Timing"
+msgstr ""
+
+msgctxt "#30011"
+msgid "Sleep after (seconds)"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Enter low power once this box has not been the displayed source, and there has been no input, for this many seconds (minimum 10). Never while playing."
+msgstr ""
+
+msgctxt "#30013"
+msgid "Idle backstop while displayed (seconds, 0 = off)"
+msgstr ""
+
+msgctxt "#30014"
+msgid "Also enter low power if this box IS the displayed source but nobody has touched it for this long. 0 disables."
+msgstr ""
+
+msgctxt "#30020"
+msgid "Low-power actions"
+msgstr ""
+
+msgctxt "#30021"
+msgid "Activate screensaver"
+msgstr ""
+
+msgctxt "#30022"
+msgid "Starts the configured Kodi screensaver (a black one saves the most)."
+msgstr ""
+
+msgctxt "#30023"
+msgid "Turn off board LEDs"
+msgstr ""
+
+msgctxt "#30024"
+msgid "Turns off the ACT (green) and PWR (red) LEDs. Ethernet jack LEDs can only be changed in config.txt."
+msgstr ""
+
+msgctxt "#30025"
+msgid "Lower CPU clock"
+msgstr ""
+
+msgctxt "#30026"
+msgid "Caps the maximum CPU frequency while in low power."
+msgstr ""
+
+msgctxt "#30027"
+msgid "CPU cap (MHz)"
+msgstr ""
+
+msgctxt "#30028"
+msgid "Maximum CPU frequency in low power. Values below the hardware minimum are raised to it (600 MHz on a Pi 4)."
+msgstr ""
+
+msgctxt "#30029"
+msgid "Disable Ethernet"
+msgstr ""
+
+msgctxt "#30030"
+msgid "Turns Ethernet off via ConnMan while in low power. SSH, shares and remote apps are unreachable until the box wakes."
+msgstr ""
+
+msgctxt "#30040"
+msgid "Advanced"
+msgstr ""
+
+msgctxt "#30041"
+msgid "CEC device"
+msgstr ""
+
+msgctxt "#30042"
+msgid "Linux CEC adapter to monitor."
+msgstr ""
+
+msgctxt "#30043"
+msgid "Log CEC routing messages"
+msgstr ""
+
+msgctxt "#30044"
+msgid "Writes every routing-relevant CEC message to kodi.log for troubleshooting."
+msgstr ""

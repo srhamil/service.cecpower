@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings version="1">
+  <section id="service.cecpower">
+    <category id="general" label="30000">
+      <group id="timing" label="30010">
+        <setting id="sleep_delay_s" type="integer" label="30011" help="30012">
+          <level>0</level>
+          <default>180</default>
+          <constraints>
+            <minimum>10</minimum>
+            <maximum>7200</maximum>
+          </constraints>
+          <control type="edit" format="integer">
+            <heading>30011</heading>
+          </control>
+        </setting>
+        <setting id="idle_backstop_s" type="integer" label="30013" help="30014">
+          <level>0</level>
+          <default>0</default>
+          <constraints>
+            <minimum>0</minimum>
+            <maximum>43200</maximum>
+          </constraints>
+          <control type="edit" format="integer">
+            <heading>30013</heading>
+          </control>
+        </setting>
+      </group>
+      <group id="actions" label="30020">
+        <setting id="act_screensaver" type="boolean" label="30021" help="30022">
+          <level>0</level>
+          <default>true</default>
+          <control type="toggle"/>
+        </setting>
+        <setting id="act_leds" type="boolean" label="30023" help="30024">
+          <level>0</level>
+          <default>true</default>
+          <control type="toggle"/>
+        </setting>
+        <setting id="act_cpu" type="boolean" label="30025" help="30026">
+          <level>0</level>
+          <default>true</default>
+          <control type="toggle"/>
+        </setting>
+        <setting id="cpu_mhz" type="integer" parent="act_cpu" label="30027" help="30028">
+          <level>0</level>
+          <default>600</default>
+          <constraints>
+            <minimum>100</minimum>
+            <maximum>3000</maximum>
+          </constraints>
+          <dependencies>
+            <dependency type="enable" setting="act_cpu">true</dependency>
+          </dependencies>
+          <control type="edit" format="integer">
+            <heading>30027</heading>
+          </control>
+        </setting>
+        <setting id="act_ethernet" type="boolean" label="30029" help="30030">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle"/>
+        </setting>
+      </group>
+      <group id="advanced" label="30040">
+        <setting id="cec_device" type="string" label="30041" help="30042">
+          <level>2</level>
+          <default>/dev/cec0</default>
+          <constraints>
+            <allowempty>false</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30041</heading>
+          </control>
+        </setting>
+        <setting id="verbose_log" type="boolean" label="30043" help="30044">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle"/>
+        </setting>
+      </group>
+    </category>
+  </section>
+</settings>
